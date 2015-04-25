@@ -1,6 +1,7 @@
 'use strict';
 
-const inNodeJs = (typeof __dirname !== 'undefined' && window.jazzMidi);
+import {inNodeJs} from './util';
+
 let midiProc;
 
 export class MIDIInput{
@@ -12,13 +13,16 @@ export class MIDIInput{
     this.type = 'input';
     this.state = 'closed';
     this.connection = 'connected';
+
     this._onmidimessage = null;
     this._onstatechange = null;
 
-    Object.defineProperty(this, 'onmidimessage', {set: function(value){
-      this._onmidimessage = value;
-      this.open()
-    }});
+    Object.defineProperty(this, 'onmidimessage', {
+      set: function(value){
+        this._onmidimessage = value;
+        this.open();
+      }
+    });
 
     Object.defineProperty(this, 'onstatechange', {set: function(value){
       this._onstatechange = value;
@@ -34,7 +38,7 @@ export class MIDIInput{
     this._jazzInstance.MidiInOpen(this.name, midiProc.bind(this));
   }
 
-  addEventListener(type, listener, useCapture ){
+  addEventListener(type, listener, useCapture){
     let listeners = this._listeners.get(type);
     if(listeners === undefined){
       return;
@@ -45,7 +49,7 @@ export class MIDIInput{
     }
   }
 
-  removeEventListener(type, listener, useCapture ){
+  removeEventListener(type, listener, useCapture){
     let listeners = this._listeners.get(type);
     if(listeners === undefined){
       return;
@@ -76,28 +80,28 @@ export class MIDIInput{
   }
 
 
-  appendToSysexBuffer(data) {
-    var oldLength = this._sysexBuffer.length;
-    var tmpBuffer = new Uint8Array( oldLength + data.length );
-    tmpBuffer.set( this._sysexBuffer );
-    tmpBuffer.set( data, oldLength );
+  appendToSysexBuffer(data){
+    let oldLength = this._sysexBuffer.length;
+    let tmpBuffer = new Uint8Array(oldLength + data.length);
+    tmpBuffer.set(this._sysexBuffer);
+    tmpBuffer.set(data, oldLength);
     this._sysexBuffer = tmpBuffer;
   }
 
 
-  bufferLongSysex( data, initialOffset ) {
-    var j = initialOffset;
-    while (j<data.length) {
-        if (data[j] == 0xF7) {
+  bufferLongSysex(data, initialOffset){
+    let j = initialOffset;
+    while(j<data.length){
+        if(data[j] == 0xF7){
             // end of sysex!
             j++;
-            this.appendToSysexBuffer( data.slice(initialOffset, j) );
+            this.appendToSysexBuffer(data.slice(initialOffset, j));
             return j;
         }
         j++;
     }
     // didn't reach the end; just tack it on.
-    this.appendToSysexBuffer( data.slice(initialOffset, j) );
+    this.appendToSysexBuffer(data.slice(initialOffset, j));
     this._inLongSysexMessage = true;
     return j;
   }
@@ -118,28 +122,28 @@ export class MIDIInput{
 
 
 midiProc = function(timestamp, data){
-  // Have to use createEvent/initEvent because IE10 fails on new CustomEvent.  Thanks, IE!
-  var length = 0;
-  var i;
-  var isSysexMessage = false;
+  // Have to use createEvent/initEvent because IE10 fails on new CustomEvent
+  let length = 0;
+  let i;
+  let isSysexMessage = false;
 
   // Jazz sometimes passes us multiple messages at once, so we need to parse them out
   // and pass them one at a time.
 
-  for (i=0; i<data.length; i+=length) {
-    var isValidMessage = true;
-    if (this._inLongSysexMessage) {
-      i = this.bufferLongSysex(data,i);
-      if ( data[i-1] != 0xf7 ) {
+  for(i = 0; i < data.length; i += length){
+    let isValidMessage = true;
+    if(this._inLongSysexMessage){
+      i = this.bufferLongSysex(data, i);
+      if(data[i-1] != 0xf7){
         // ran off the end without hitting the end of the sysex message
         return;
       }
       isSysexMessage = true;
-    } else {
+    }else{
       isSysexMessage = false;
-      switch (data[i] & 0xF0) {
+      switch(data[i] & 0xF0){
         case 0x00:  // Chew up spurious 0x00 bytes.  Fixes a Windows problem.
-          length=1;
+          length = 1;
           isValidMessage = false;
           break;
 
@@ -157,10 +161,10 @@ midiProc = function(timestamp, data){
           break;
 
         case 0xF0:
-          switch (data[i]) {
-            case 0xf0:  // variable-length sysex.
+          switch(data[i]){
+            case 0xf0:  // letiable-length sysex.
               i = this.bufferLongSysex(data,i);
-              if ( data[i-1] != 0xf7 ) {
+              if(data[i-1] != 0xf7){
                 // ran off the end without hitting the end of the sysex message
                 return;
               }
@@ -183,24 +187,29 @@ midiProc = function(timestamp, data){
           break;
       }
     }
-    if (!isValidMessage)
+    if(!isValidMessage){
       continue;
-    var evt = {};
-    if (!inNodeJs) {
-      evt = document.createEvent( 'Event' );
-      evt.initEvent( 'midimessage', false, false );
     }
-    evt.receivedTime = parseFloat( timestamp.toString()) + this._jazzInstance._perfTimeZero;
-    if (isSysexMessage || this._inLongSysexMessage) {
-      evt.data = new Uint8Array( this._sysexBuffer );
+    let evt ={};
+    if(!inNodeJs){
+      evt = document.createEvent('Event');
+      evt.initEvent('midimessage', false, false);
+    }
+    evt.receivedTime = parseFloat(timestamp.toString()) + this._jazzInstance._perfTimeZero;
+    if(isSysexMessage || this._inLongSysexMessage){
+      evt.data = new Uint8Array(this._sysexBuffer);
       this._sysexBuffer = new Uint8Array(0);
       this._inLongSysexMessage = false;
-    } else
+    }else{
       evt.data = new Uint8Array(data.slice(i, length+i));
-
-    if (inNodeJs) {
-      if (this.onmidimessage) this.onmidimessage( evt );
     }
-    else this.dispatchEvent( evt );
+
+    if(inNodeJs){
+      if(this.onmidimessage){
+        this.onmidimessage(evt);
+      }
+    }else{
+      this.dispatchEvent(evt);
+    }
   }
 };

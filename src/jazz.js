@@ -1,7 +1,8 @@
 'use strict';
 
+import {inNodeJs} from './util';
+
 const jazzPluginInitTime = 100; // milliseconds
-const inNodeJs = (typeof __dirname !== 'undefined' && window.jazzMidi);
 
 let jazzInstanceNumber = 0;
 let jazzInstances = new Map();

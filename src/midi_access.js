@@ -4,13 +4,12 @@ import {createJazzInstance, getJazzInstance} from './jazz';
 import {MIDIInput} from './midi_input';
 import {MIDIOutput} from './midi_output';
 
-
-const inNodeJs = (typeof __dirname !== 'undefined' && window.jazzMidi);
-
 let jazzInstance;
 let inputsMap = new Map();
 let outputsMap = new Map();
-let allMidiIns = []; // for nodejs;
+let midiAccess = {
+  sysexEnabled: true
+};
 
 export function createMIDIAccess(){
 
@@ -26,11 +25,9 @@ export function createMIDIAccess(){
 
       createMIDIPorts(function(){
         setupListeners();
-        resolve({
-          inputs: inputsMap,
-          outputs: outputsMap,
-          sysexEnabled: true
-        });
+        midiAccess.inputs = inputsMap;
+        midiAccess.outputs = outputsMap;
+        resolve(midiAccess);
       });
     });
 
@@ -42,36 +39,18 @@ function createMIDIPorts(callback){
   let outputs = jazzInstance.MidiOutList();
   let numInputs = inputs.length;
   let numOutputs = outputs.length;
-  createMIDIPort(0, numInputs, 'input', inputs, function(){
-    createMIDIPort(0, numOutputs, 'output', outputs, callback);
+
+  loopCreateMIDIPort(0, numInputs, 'input', inputs, function(){
+    loopCreateMIDIPort(0, numOutputs, 'output', outputs, callback);
   });
 }
 
 
-function createMIDIPort(index, max, type, list, callback){
+function loopCreateMIDIPort(index, max, type, list, callback){
   if(index < max){
-    getJazzInstance(type, function(instance){
-      let name = list[index];
-      let port;
-      let info = [name, '', ''];
-      if(type === 'input'){
-        if(jazzInstance.Support('MidiInInfo')){
-          info = jazzInstance.MidiInInfo(name);
-        }
-        port = new MIDIInput(info, instance);
-        inputsMap.set(name, port);
-        if(inNodeJs){
-          allMidiIns.push(this._jazzInstance);
-        }
-      }else if(type === 'output'){
-        if(jazzInstance.Support('MidiOutInfo')){
-          info = jazzInstance.MidiOutInfo(name);
-        }
-        port = new MIDIOutput(info, instance);
-        outputsMap.set(name, port);
-      }
-      index++;
-      createMIDIPort(index, max, type, list, callback);
+    let name = list[index++];
+    createMIDIPort(type, name, function(){
+      loopCreateMIDIPort(index, max, type, list, callback);
     });
   }else{
     callback();
@@ -79,25 +58,86 @@ function createMIDIPort(index, max, type, list, callback){
 }
 
 
-function setupListeners(){
-  jazzInstance.OnDisconnectMidiIn(function(name){
-    // let port = inputsMap.get(name);
-    // port.close();
-    // port._jazzInstance.inputInUse = false;
-    // inputsMap.delete(name);
-  });
-
-  jazzInstance.OnDisconnectMidiOut(function(name){
-    // var port = _inputsByName[name];
-    // port._jazzInstance.outputInUse = false;
-    // delete _outputsByName[name];
-  });
-
-  jazzInstance.OnConnectMidiIn(function(name){
-  });
-
-  jazzInstance.OnConnectMidiOut(function(name){
+function createMIDIPort(type, name, callback){
+  getJazzInstance(type, function(instance){
+    let port;
+    let info = [name, '', ''];
+    if(type === 'input'){
+      if(jazzInstance.Support('MidiInInfo')){
+        info = jazzInstance.MidiInInfo(name);
+      }
+      port = new MIDIInput(info, instance);
+      inputsMap.set(name, port);
+    }else if(type === 'output'){
+      if(jazzInstance.Support('MidiOutInfo')){
+        info = jazzInstance.MidiOutInfo(name);
+      }
+      port = new MIDIOutput(info, instance);
+      outputsMap.set(name, port);
+    }
+    callback();
   });
 }
 
+
+function getPortByName(ports, name){
+  let port;
+  for(port of ports.values()){
+    if(port.name === name){
+      break;
+    }
+  }
+  return port;
+}
+
+
+function setupListeners(){
+  jazzInstance.OnDisconnectMidiIn(function(name){
+    let port = getPortByName(inputsMap, name);
+    if(port !== undefined){
+      port.close();
+      port._jazzInstance.inputInUse = false;
+      inputsMap.delete(name);
+      if(midiAccess.onstatechange){
+        midiAccess.onstatechange();
+      }
+    }
+  });
+
+  jazzInstance.OnDisconnectMidiOut(function(name){
+    let port = getPortByName(outputsMap, name);
+    if(port !== undefined){
+      port.close();
+      port._jazzInstance.outputInUse = false;
+      outputsMap.delete(name);
+      if(midiAccess.onstatechange){
+        midiAccess.onstatechange();
+      }
+    }
+  });
+
+  jazzInstance.OnConnectMidiIn(function(name){
+    createMIDIPort('input', name, function(){
+      if(midiAccess.onstatechange){
+        midiAccess.onstatechange();
+      }
+    });
+  });
+
+  jazzInstance.OnConnectMidiOut(function(name){
+    createMIDIPort('output', name, function(){
+      if(midiAccess.onstatechange){
+        midiAccess.onstatechange();
+      }
+    });
+  });
+}
+
+
+export function closeAllMIDIInputs(){
+  inputsMap.forEach(function(input){
+    //input.close();
+    input._jazzInstance.MidiInClose();
+  });
+}
 
