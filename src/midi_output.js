@@ -4,6 +4,7 @@ let midiOutputIndex = 0;
 
 export class MIDIOutput{
   constructor(info, instance){
+    this.id = info[0];
     this.name = info[0];
     this.manufacturer = info[1];
     this.version = info[2];

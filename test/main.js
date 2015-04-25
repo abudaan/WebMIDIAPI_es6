@@ -84,13 +84,14 @@ window.onload = function(){
                     activeInputs[id] = port;
                     // implicitly open port by adding a listener
                     //port.onmidimessage = inputListener;
-                    // port.open();
+                    //port.open();
                     port.addEventListener('midimessage', function(e){
                         inputListener(e);
+                        //console.log('addEventListener', e);
                     });
-                    port.addEventListener('statechange', function(e){
-                        console.log('port.statechange', e);
-                    });
+                    // port.addEventListener('statechange', function(e){
+                    //     console.log('port.statechange', e);
+                    // });
                 }else{
                     delete activeInputs[id];
                     port.close();

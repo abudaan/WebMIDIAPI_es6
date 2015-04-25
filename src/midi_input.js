@@ -5,65 +5,72 @@ let midiProc;
 
 export class MIDIInput{
   constructor(info, instance){
+    this.id = info[0];
     this.name = info[0];
     this.manufacturer = info[1];
     this.version = info[2];
     this.type = 'input';
-    this.state = 'open';
+    this.state = 'closed';
     this.connection = 'connected';
-    this.onmidimessage = null;
-    this.onstatechange = null;
+    this._onmidimessage = null;
+    this._onstatechange = null;
 
-    this._listeners = new Map();
+    Object.defineProperty(this, 'onmidimessage', {set: function(value){
+      this._onmidimessage = value;
+      this.open()
+    }});
+
+    Object.defineProperty(this, 'onstatechange', {set: function(value){
+      this._onstatechange = value;
+    }});
+
+    this._listeners = new Map().set('midimessage', new Set()).set('statechange', new Set());
     this._inLongSysexMessage = false;
     this._sysexBuffer = new Uint8Array();
 
     this._jazzInstance = instance.jazz;
     this._jazzInstanceId = instance.jazz.id;
     this._jazzInstance.inputInUse = true;
-    this._input = this._jazzInstance.MidiInOpen(this.name, midiProc.bind(this));
+    this._jazzInstance.MidiInOpen(this.name, midiProc.bind(this));
   }
 
   addEventListener(type, listener, useCapture ){
-      if(type !== 'midimessage'){
-          return;
-      }
+    let listeners = this._listeners.get(type);
+    if(listeners === undefined){
+      return;
+    }
 
-      for(var i = 0, maxi = this._listeners.length; i < maxi; i++){
-          if(this._listeners[i] == listener){
-              return;
-          }
-      }
-      this._listeners.push( listener );
+    if(listeners.has(listener) === false){
+      listeners.add(listener);
+    }
   }
 
   removeEventListener(type, listener, useCapture ){
-    if(type !== 'midimessage'){
+    let listeners = this._listeners.get(type);
+    if(listeners === undefined){
       return;
     }
-    for (var i=0; i<this._listeners.length; i++)
-        if (this._listeners[i] == listener) {
-            this._listeners.splice( i, 1 );  //remove it
-            return;
-        }
+
+    if(listeners.has(listener) === false){
+      listeners.delete(listener);
     }
+  }
 
   preventDefault(){
-      this._pvtDef = true;
+    this._pvtDef = true;
   }
 
   dispatchEvent(evt){
     this._pvtDef = false;
 
-    // dispatch to listeners
-    for (var i=0; i<this._listeners.length; i++)
-        if (this._listeners[i].handleEvent)
-            this._listeners[i].handleEvent.bind(this)( evt );
-        else
-            this._listeners[i].bind(this)( evt );
+    let listeners = this._listeners.get(evt.type);
+    listeners.forEach(function(listener){
+      listener(evt);
+    });
 
-    if (this.onmidimessage)
-        this.onmidimessage( evt );
+    if(this._onmidimessage !== null){
+      this._onmidimessage(evt);
+    }
 
     return this._pvtDef;
   }
@@ -96,12 +103,15 @@ export class MIDIInput{
   }
 
   open(){
-    // nothing to do here, the port has already been opened
+    //this._jazzInstance.MidiInOpen(this.name, midiProc.bind(this));
   }
 
   close(){
+    //this._jazzInstance.MidiInClose(this.name);
     this.onmidimessage = null;
-    this._listeners = [];
+    this.onstatechange = null;
+    this._listeners.get('midimessage').clear();
+    this._listeners.get('statechange').clear();
   }
 }
 
