@@ -20,6 +20,7 @@ export class MIDIOutput{
     this._jazzInstance = instance.jazz;
     this._jazzInstanceId = instance.jazz.id;
     this._jazzInstance.outputInUse = true;
+    this._jazzInstance.MidiOutOpen(this.name);
   }
 
   open(){
@@ -34,6 +35,7 @@ export class MIDIOutput{
 
   send(data, timestamp){
     let delayBeforeSend = 0;
+
     if(data.length === 0){
       return false;
     }
