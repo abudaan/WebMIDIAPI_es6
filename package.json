@@ -1,0 +1,17 @@
+{
+  "name": "WebMIDIAPIShim",
+  "private": false,
+  "devDependencies": {
+    "babelify": ">=6.0.0",
+    "browserify": ">=8.1.1",
+    "exorcist": "^0.1.6",
+    "watchify": ">=1.0.1"
+  },
+  "engines": {
+    "node": "0.10.x"
+  },
+  "scripts": {
+    "build": "browserify src/shim.js -t [ babelify --sourceMapRelative ./src ] --debug | exorcist build/WebMIDIAPIShim.js.map > build/WebMIDIAPIShim.js",
+    "watch": "watchify src/shim.js -t babelify -o build/WebMIDIAPIShim.js --debug --verbose"
+  }
+}
