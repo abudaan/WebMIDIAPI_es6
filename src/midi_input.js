@@ -1,5 +1,8 @@
 'use strict';
 
+const inNodeJs = (typeof __dirname !== 'undefined' && window.jazzMidi);
+let midiProc;
+
 export class MIDIInput{
   constructor(info, instance){
     this.name = info[0];
@@ -104,7 +107,7 @@ export class MIDIInput{
 
 
 
-function midiProc(timestamp, data){
+midiProc = function(timestamp, data){
   // Have to use createEvent/initEvent because IE10 fails on new CustomEvent.  Thanks, IE!
   var length = 0;
   var i;
@@ -190,4 +193,4 @@ function midiProc(timestamp, data){
     }
     else this.dispatchEvent( evt );
   }
-}
+};

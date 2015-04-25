@@ -1,8 +1,8 @@
 'use strict';
 
 import {createJazzInstance, getJazzInstance} from './jazz';
-//import {MIDIInput} from './midi_input';
-//import {MIDIOutput} from './midi_output';
+import {MIDIInput} from './midi_input';
+import {MIDIOutput} from './midi_output';
 
 
 const inNodeJs = (typeof __dirname !== 'undefined' && window.jazzMidi);
@@ -58,8 +58,8 @@ function createMIDIPort(index, max, type, list, callback){
         if(jazzInstance.Support('MidiInInfo')){
           info = jazzInstance.MidiInInfo(name);
         }
-        //port = new MIDIInput(info, instance);
-        //inputsMap.set(name, port);
+        port = new MIDIInput(info, instance);
+        inputsMap.set(name, port);
         if(inNodeJs){
           allMidiIns.push(this._jazzInstance);
         }
@@ -67,8 +67,8 @@ function createMIDIPort(index, max, type, list, callback){
         if(jazzInstance.Support('MidiOutInfo')){
           info = jazzInstance.MidiOutInfo(name);
         }
-        //port = new MIDIOutput(info, instance);
-        //outputsMap.set(name, port);
+        port = new MIDIOutput(info, instance);
+        outputsMap.set(name, port);
       }
       index++;
       createMIDIPort(index, max, type, list, callback);
