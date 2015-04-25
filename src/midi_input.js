@@ -32,8 +32,7 @@ export class MIDIInput{
     this._inLongSysexMessage = false;
     this._sysexBuffer = new Uint8Array();
 
-    this._jazzInstance = instance.jazz;
-    this._jazzInstanceId = instance.jazz.id;
+    this._jazzInstance = instance;
     this._jazzInstance.inputInUse = true;
     this._jazzInstance.MidiInOpen(this.name, midiProc.bind(this));
   }

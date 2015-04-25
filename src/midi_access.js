@@ -21,7 +21,7 @@ export function createMIDIAccess(){
         return;
       }
 
-      jazzInstance = instance.jazz;
+      jazzInstance = instance;
 
       createMIDIPorts(function(){
         setupListeners();
@@ -63,14 +63,14 @@ function createMIDIPort(type, name, callback){
     let port;
     let info = [name, '', ''];
     if(type === 'input'){
-      if(jazzInstance.Support('MidiInInfo')){
-        info = jazzInstance.MidiInInfo(name);
+      if(instance.Support('MidiInInfo')){
+        info = instance.MidiInInfo(name);
       }
       port = new MIDIInput(info, instance);
       inputsMap.set(name, port);
     }else if(type === 'output'){
-      if(jazzInstance.Support('MidiOutInfo')){
-        info = jazzInstance.MidiOutInfo(name);
+      if(instance.Support('MidiOutInfo')){
+        info = instance.MidiOutInfo(name);
       }
       port = new MIDIOutput(info, instance);
       outputsMap.set(name, port);
