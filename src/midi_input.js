@@ -1,8 +1,9 @@
 'use strict';
 
-import {inNodeJs} from './util';
+import {getDevice} from './util';
 
 let midiProc;
+let nodejs = getDevice().nodejs;
 
 export class MIDIInput{
   constructor(info, instance){
@@ -121,7 +122,6 @@ export class MIDIInput{
 
 
 midiProc = function(timestamp, data){
-  // Have to use createEvent/initEvent because IE10 fails on new CustomEvent
   let length = 0;
   let i;
   let isSysexMessage = false;
@@ -189,8 +189,8 @@ midiProc = function(timestamp, data){
     if(!isValidMessage){
       continue;
     }
-    let evt ={};
-    if(!inNodeJs){
+    let evt = {};
+    if(getDevice().nodejs === false){
       evt = document.createEvent('Event');
       evt.initEvent('midimessage', false, false);
     }
@@ -203,11 +203,12 @@ midiProc = function(timestamp, data){
       evt.data = new Uint8Array(data.slice(i, length+i));
     }
 
-    if(inNodeJs){
+    if(nodejs){
       if(this.onmidimessage){
         this.onmidimessage(evt);
       }
     }else{
+      //let e = new CustomEvent('midimessage', evt);
       this.dispatchEvent(evt);
     }
   }

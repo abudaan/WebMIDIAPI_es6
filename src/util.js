@@ -4,78 +4,131 @@
 export const inNodeJs = (typeof __dirname !== 'undefined' && window.jazzMidi);
 
 
+let device;
 
-export function polyfillPerformance(){
-  if('performance' in window === false) {
-    let nowOffset = Date.now();
-    window.performance = {
-      now: function now(){
-        return Date.now() - nowOffset;
-      }
-    };
+export function getDevice(){
+
+  if(device !== undefined){
+    return device;
   }
+
+  let
+    platform = 'undetected',
+    browser = 'undetected',
+    nodejs = false;
+
+  if(navigator === undefined){
+    nodejs = (typeof __dirname !== 'undefined' && window.jazzMidi);
+    if(nodejs === true){
+      platform = process.platform;
+    }
+    device = {
+      platform: platform,
+      browser: false,
+      nodejs: nodejs,
+      mobile: platform === 'ios' || platform === 'android'
+    };
+    return device;
+  }
+
+
+  let ua = navigator.userAgent;
+
+  if(ua.match(/(iPad|iPhone|iPod)/g)){
+    platform = 'ios';
+  }else if(ua.indexOf('Android') !== -1){
+    platform = 'android';
+  }else if(ua.indexOf('Linux') !== -1){
+    platform = 'linux';
+  }else if(ua.indexOf('Macintosh') !== -1){
+    platform = 'osx';
+  }else if(ua.indexOf('Windows') !== -1){
+    platform = 'windows';
+  }
+
+  if(ua.indexOf('Chrome') !== -1){
+    // chrome, chromium and canary
+    browser = 'chrome';
+
+    if(ua.indexOf('OPR') !== -1){
+      browser = 'opera';
+    }else if(ua.indexOf('Chromium') !== -1){
+      browser = 'chromium';
+    }
+  }else if(ua.indexOf('Safari') !== -1){
+    browser = 'safari';
+  }else if(ua.indexOf('Firefox') !== -1){
+    browser = 'firefox';
+  }else if(ua.indexOf('Trident') !== -1){
+    browser = 'ie';
+    if(ua.indexOf('MSIE 9')){
+      browser = 'ie 9';
+    }
+  }
+
+  if(platform === 'ios'){
+    if(ua.indexOf('CriOS') !== -1){
+      browser = 'chrome';
+    }
+  }
+
+  device = {
+    platform: platform,
+    browser: browser,
+    mobile: platform === 'ios' || platform === 'android',
+    nodejs: false
+  };
+  return device;
 }
 
 
-/*
+export function polyfillPerformance(){
 
-// Polyfill window.performance.now() if necessary.
-export function polyfillPerformance(exports) {
-
-  var perf = {}, props;
-
-  function findAlt(){
-    let prefix = ['moz', 'webkit', 'o', 'ms'],
-    i = prefix.length,
-    //worst case, we use Date.now()
-    props = {
-      value: (function (start) {
-        return function () {
-          return Date.now() - start;
-        };
-      }(Date.now()))
-    };
-
-    //seach for vendor prefixed version
-    for (; i >= 0; i--) {
-      let methodName = prefix[i] + 'Now';
-      if(exports.performance[methodName] !== undefined){
-        props.value = (function(method){
-          return function(){
-            exports.performance[method]();
-          };
-        }(methodName));
-        return props;
-      }
-    }
-
-    //otherwise, try to use connectionStart
-    if(exports.performance.timing !== undefined && exports.performance.timing.connectStart !== undefined){
-      //this pretty much approximates performance.now() to the millisecond
-      props.value = (function (start) {
-        return function() {
-          Date.now() - start;
-        };
-      }(exports.performance.timing.connectStart));
-    }
-    return props;
+  if(window.performance === undefined){
+    window.performance = {};
   }
 
-  //if already defined, bail
-  if(exports.performance !== undefined && exports.performance.now !== undefined){
+  Date.now = (Date.now || function(){
+    return new Date().getTime();
+  });
+
+  if(window.performance.now === undefined){
+
+    let nowOffset = Date.now();
+
+    if(performance.timing !== undefined && performance.timing.navigationStart !== undefined){
+      nowOffset = performance.timing.navigationStart;
+    }
+
+    window.performance.now = function now(){
+      return Date.now() - nowOffset;
+    }
+  }
+}
+
+export function polyfillCustomEvent(){
+
+  if(typeof window.Event === 'function'){
     return;
   }
 
-  if(exports.performance === undefined){
-    Object.defineProperty(exports, 'performance', {
-      get: function () {
-        return perf;
-      }
-    });
-  }
+  function CustomEvent(event, params){
+    params = params || {bubbles: false, cancelable: false, detail: undefined};
+    var evt = document.createEvent('CustomEvent');
+    evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
+    return evt;
+  };
 
-  //otherwise, performance is there, but not 'now()'
-  props = findAlt();
-  Object.defineProperty(exports.performance, 'now', props);
+  CustomEvent.prototype = window.Event.prototype;
+  window.CustomEvent = CustomEvent;
+  window.CustomEvent = CustomEvent;
 }
-*/
+
+
+export function polyfill(){
+  let device = getDevice();
+  // if(device.browser === 'ie'){
+  //   polyfillCustomEvent();
+  // }
+  polyfillPerformance();
+}

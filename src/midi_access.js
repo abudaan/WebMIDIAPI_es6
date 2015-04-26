@@ -10,6 +10,7 @@ let outputsMap = new Map();
 let midiAccess = {
   sysexEnabled: true
 };
+let listeners = new Set();
 
 export function createMIDIAccess(){
 
@@ -98,9 +99,7 @@ function setupListeners(){
       port.close();
       port._jazzInstance.inputInUse = false;
       inputsMap.delete(name);
-      if(midiAccess.onstatechange){
-        midiAccess.onstatechange();
-      }
+      dispatchEvent();
     }
   });
 
@@ -110,27 +109,54 @@ function setupListeners(){
       port.close();
       port._jazzInstance.outputInUse = false;
       outputsMap.delete(name);
-      if(midiAccess.onstatechange){
-        midiAccess.onstatechange();
-      }
+      dispatchEvent();
     }
   });
 
   jazzInstance.OnConnectMidiIn(function(name){
     createMIDIPort('input', name, function(){
-      if(midiAccess.onstatechange){
-        midiAccess.onstatechange();
-      }
+      dispatchEvent();
     });
   });
 
   jazzInstance.OnConnectMidiOut(function(name){
     createMIDIPort('output', name, function(){
-      if(midiAccess.onstatechange){
-        midiAccess.onstatechange();
-      }
+      dispatchEvent();
     });
   });
+}
+
+
+function addEventListener(type, listener, useCapture){
+  if(type !== 'statechange'){
+    return;
+  }
+  if(listeners.has(listener) === false){
+    listeners.set(listener);
+  }
+}
+
+
+function removeEventListener(type, listener, useCapture){
+  if(type !== 'statechange'){
+    return;
+  }
+  if(listeners.has(listener) === true){
+    listeners.delete(listener);
+  }
+}
+
+
+function dispatchEvent(){
+  // create MIDIConnectionEvent (note: IE does not support CustomEvent)
+  let evt = new CustomEvent('statechange');
+  evt.initEvent('statechange')
+  if(midiAccess.onstatechange){
+    midiAccess.onstatechange();
+  }
+  for(let listener of listeners){
+    listener(evt);
+  }
 }
 
 

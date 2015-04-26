@@ -58,19 +58,6 @@ window.onload = function(){
       divOutputs.innerHTML += checkbox + '<br>';
     });
 
-    /*
-    ECMA6
-
-    for(port of inputs.values()){
-      checkbox = '<label><input type="checkbox" name="input_' + i + '" value="' + port.id + '">' + port.name + ' ' + port.id + '</label>';
-      divInputs.innerHTML += checkbox + '<br>';
-    }
-
-    for(port of outputs.values()){
-      checkbox = '<label><input type="checkbox" name="output_' + i + '" value="' + port.id + '">' + port.name + ' ' + port.id + '</label>';
-      divOutputs.innerHTML += checkbox + '<br>';
-    }
-    */
 
     checkboxes = document.querySelectorAll('#inputs input[type="checkbox"]');
 
@@ -150,6 +137,8 @@ window.onload = function(){
 
 
   function inputListener(midimessageEvent){
+    console.log(midimessageEvent);
+    return
     var port, portId,
       data = midimessageEvent.data,
       type = data[0],

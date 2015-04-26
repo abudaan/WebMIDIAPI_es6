@@ -1,6 +1,6 @@
 'use strict';
 
-import {inNodeJs} from './util';
+import {getDevice} from './util';
 
 const jazzPluginInitTime = 100; // milliseconds
 
@@ -13,7 +13,7 @@ export function createJazzInstance(callback){
   let instance;
   let objRef, activeX;
 
-  if(inNodeJs === true){
+  if(getDevice().nodejs === true){
     objRef = new window.jazzMidi.MIDI();
   }else{
     let o1 = document.createElement('object');
