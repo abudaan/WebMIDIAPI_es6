@@ -15,8 +15,8 @@ export class MIDIInput{
     this.manufacturer = info[1];
     this.version = info[2];
     this.type = 'input';
-    this.state = 'closed';
-    this.connection = 'connected';
+    this.state = 'connected';
+    this.connection = 'closed';
 
     this._onmidimessage = null;
     this._onstatechange = null;
@@ -92,24 +92,24 @@ export class MIDIInput{
   }
 
   open(){
-    if(this.state === 'open'){
+    if(this.connection === 'open'){
       return;
     }
     if(getDevice().platform !== 'linux'){
       this._jazzInstance.MidiInOpen(this.name, midiProc.bind(this));
     }
-    this.state = 'open';
+    this.connection = 'open';
     dispatchEvent(this); // dispatch event via MIDIAccess
   }
 
   close(){
-    if(this.state === 'closed'){
+    if(this.connection === 'closed'){
       return;
     }
     if(getDevice().platform !== 'linux'){
       this._jazzInstance.MidiInClose(this.name);
     }
-    this.state = 'closed';
+    this.connection = 'closed';
     dispatchEvent(this); // dispatch event via MIDIAccess
     this.onmidimessage = null;
     this.onstatechange = null;

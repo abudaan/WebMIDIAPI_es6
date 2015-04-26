@@ -104,6 +104,7 @@ function setupListeners(){
   jazzInstance.OnDisconnectMidiIn(function(name){
     let port = getPortByName(inputsMap, name);
     if(port !== undefined){
+      port.state = 'disconnected';
       port.close();
       port._jazzInstance.inputInUse = false;
       inputsMap.delete(port.id);
@@ -114,6 +115,7 @@ function setupListeners(){
   jazzInstance.OnDisconnectMidiOut(function(name){
     let port = getPortByName(outputsMap, name);
     if(port !== undefined){
+      port.state = 'disconnected';
       port.close();
       port._jazzInstance.outputInUse = false;
       outputsMap.delete(port.id);

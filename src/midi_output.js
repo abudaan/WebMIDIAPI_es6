@@ -9,8 +9,8 @@ export class MIDIOutput{
     this.manufacturer = info[1];
     this.version = info[2];
     this.type = 'output';
-    this.state = 'closed';
-    this.connection = 'connected';
+    this.state = 'connected';
+    this.connection = 'closed';
     this.onmidimessage = null;
     this.onstatechange = null;
 
@@ -26,17 +26,23 @@ export class MIDIOutput{
   }
 
   open(){
+    if(this.connection === 'open'){
+      return;
+    }
     if(getDevice().platform !== 'linux'){
       this._jazzInstance.MidiOutOpen(this.name);
     }
-    this.state = 'open';
+    this.connection = 'open';
   }
 
   close(){
+    if(this.connection === 'closed'){
+      return;
+    }
     if(getDevice().platform !== 'linux'){
       this._jazzInstance.MidiOutClose(this.name);
     }
-    this.state = 'closed';
+    this.connection = 'closed';
   }
 
   send(data, timestamp){
