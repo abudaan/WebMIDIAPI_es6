@@ -48,7 +48,7 @@ export class MIDIOutput{
     dispatchEvent(this); // dispatch event via MIDIAccess
     this.onstatechange = null;
     this._listeners.clear();
- }
+  }
 
   send(data, timestamp){
     let delayBeforeSend = 0;
