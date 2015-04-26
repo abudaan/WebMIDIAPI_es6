@@ -1,10 +1,11 @@
 'use strict';
 
-import {getDevice, generateUUID} from './util';
+import {getDevice} from './util';
+import {dispatchEvent, getMIDIDeviceId} from './midi_access';
 
 export class MIDIOutput{
   constructor(info, instance){
-    this.id = generateUUID();
+    this.id = getMIDIDeviceId(info[0], 'output');
     this.name = info[0];
     this.manufacturer = info[1];
     this.version = info[2];
@@ -33,6 +34,7 @@ export class MIDIOutput{
       this._jazzInstance.MidiOutOpen(this.name);
     }
     this.connection = 'open';
+    dispatchEvent(this); // dispatch event via MIDIAccess
   }
 
   close(){
@@ -43,7 +45,10 @@ export class MIDIOutput{
       this._jazzInstance.MidiOutClose(this.name);
     }
     this.connection = 'closed';
-  }
+    dispatchEvent(this); // dispatch event via MIDIAccess
+    this.onstatechange = null;
+    this._listeners.clear();
+ }
 
   send(data, timestamp){
     let delayBeforeSend = 0;
@@ -91,8 +96,8 @@ export class MIDIOutput{
       listener(evt);
     });
 
-    if(this._onstatechange !== null){
-      this._onstatechange(evt);
+    if(this.onstatechange !== null){
+      this.onstatechange(evt);
     }
   }
 }

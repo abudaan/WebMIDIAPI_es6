@@ -1,16 +1,16 @@
 'use strict';
 
-import {getDevice, generateUUID} from './util';
+import {getDevice} from './util';
 import {MIDIMessageEvent} from './midimessage_event';
 import {MIDIConnectionEvent} from './midiconnection_event';
-import {dispatchEvent} from './midi_access';
+import {dispatchEvent, getMIDIDeviceId} from './midi_access';
 
 let midiProc;
 let nodejs = getDevice().nodejs;
 
 export class MIDIInput{
   constructor(info, instance){
-    this.id = generateUUID();
+    this.id = getMIDIDeviceId(info[0], 'input');
     this.name = info[0];
     this.manufacturer = info[1];
     this.version = info[2];
@@ -18,9 +18,8 @@ export class MIDIInput{
     this.state = 'connected';
     this.connection = 'pending';
 
+    this.onstatechange = null;
     this._onmidimessage = null;
-    this._onstatechange = null;
-
     Object.defineProperty(this, 'onmidimessage', {
       set: function(value){
         this._onmidimessage = value;
@@ -29,10 +28,6 @@ export class MIDIInput{
         }
       }
     });
-
-    Object.defineProperty(this, 'onstatechange', {set: function(value){
-      this._onstatechange = value;
-    }});
 
     this._listeners = new Map().set('midimessage', new Set()).set('statechange', new Set());
     this._inLongSysexMessage = false;
@@ -83,8 +78,8 @@ export class MIDIInput{
         this._onmidimessage(evt);
       }
     }else if(evt.type === 'statechange'){
-      if(this._onstatechange !== null){
-        this._onstatechange(evt);
+      if(this.onstatechange !== null){
+        this.onstatechange(evt);
       }
     }
 
@@ -112,7 +107,7 @@ export class MIDIInput{
     this.connection = 'closed';
     dispatchEvent(this); // dispatch event via MIDIAccess
     this._onmidimessage = null;
-    this._onstatechange = null;
+    this.onstatechange = null;
     this._listeners.get('midimessage').clear();
     this._listeners.get('statechange').clear();
   }
@@ -226,8 +221,8 @@ midiProc = function(timestamp, data){
     }
 
     if(nodejs){
-      if(this.onmidimessage){
-        this.onmidimessage(evt);
+      if(this._onmidimessage){
+        this._onmidimessage(evt);
       }
     }else{
       let e = new MIDIMessageEvent(this, evt.data, evt.receivedTime);

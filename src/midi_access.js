@@ -4,26 +4,52 @@ import {createJazzInstance, getJazzInstance} from './jazz';
 import {MIDIInput} from './midi_input';
 import {MIDIOutput} from './midi_output';
 import {MIDIConnectionEvent} from './midiconnection_event';
+import {generateUUID} from './util';
 
 
 let midiAccess;
 let jazzInstance;
-let inputsMap = new Map();
-let outputsMap = new Map();
+let midiInputs = new Map();
+let midiOutputs = new Map();
+let midiInputIds = new Map();
+let midiOutputIds = new Map();
 let listeners = new Set();
 
 
 class MIDIAccess{
-  constructor(inputsMap, outputsMap){
+  constructor(midiInputs, midiOutputs){
     this.sysexEnabled = true;
-    this.inputs = inputsMap;
-    this.outputs = outputsMap;
+    this.inputs = midiInputs;
+    this.outputs = midiOutputs;
+  }
+
+  addEventListener(type, listener, useCapture){
+    if(type !== 'statechange'){
+      return;
+    }
+    if(listeners.has(listener) === false){
+      listeners.set(listener);
+    }
+  }
+
+  removeEventListener(type, listener, useCapture){
+    if(type !== 'statechange'){
+      return;
+    }
+    if(listeners.has(listener) === true){
+      listeners.delete(listener);
+    }
   }
 }
 
 export function createMIDIAccess(){
 
   return new Promise(function executor(resolve, reject){
+
+    if(midiAccess !== undefined){
+      resolve(midiAccess);
+      return;
+    }
 
     createJazzInstance(function(instance){
       if(instance === undefined){
@@ -35,7 +61,7 @@ export function createMIDIAccess(){
 
       createMIDIPorts(function(){
         setupListeners();
-        midiAccess = new MIDIAccess(inputsMap, outputsMap);
+        midiAccess = new MIDIAccess(midiInputs, midiOutputs);
         resolve(midiAccess);
       });
     });
@@ -76,13 +102,13 @@ function createMIDIPort(type, name, callback){
         info = instance.MidiInInfo(name);
       }
       port = new MIDIInput(info, instance);
-      inputsMap.set(port.id, port);
+      midiInputs.set(port.id, port);
     }else if(type === 'output'){
       if(instance.Support('MidiOutInfo')){
         info = instance.MidiOutInfo(name);
       }
       port = new MIDIOutput(info, instance);
-      outputsMap.set(port.id, port);
+      midiOutputs.set(port.id, port);
     }
     callback(port);
   });
@@ -102,23 +128,23 @@ function getPortByName(ports, name){
 
 function setupListeners(){
   jazzInstance.OnDisconnectMidiIn(function(name){
-    let port = getPortByName(inputsMap, name);
+    let port = getPortByName(midiInputs, name);
     if(port !== undefined){
       port.state = 'disconnected';
       port.close();
       port._jazzInstance.inputInUse = false;
-      inputsMap.delete(port.id);
+      midiInputs.delete(port.id);
       dispatchEvent(port);
     }
   });
 
   jazzInstance.OnDisconnectMidiOut(function(name){
-    let port = getPortByName(outputsMap, name);
+    let port = getPortByName(midiOutputs, name);
     if(port !== undefined){
       port.state = 'disconnected';
       port.close();
       port._jazzInstance.outputInUse = false;
-      outputsMap.delete(port.id);
+      midiOutputs.delete(port.id);
       dispatchEvent(port);
     }
   });
@@ -134,26 +160,6 @@ function setupListeners(){
       dispatchEvent(port);
     });
   });
-}
-
-
-function addEventListener(type, listener, useCapture){
-  if(type !== 'statechange'){
-    return;
-  }
-  if(listeners.has(listener) === false){
-    listeners.set(listener);
-  }
-}
-
-
-function removeEventListener(type, listener, useCapture){
-  if(type !== 'statechange'){
-    return;
-  }
-  if(listeners.has(listener) === true){
-    listeners.delete(listener);
-  }
 }
 
 
@@ -173,9 +179,28 @@ export function dispatchEvent(port){
 
 
 export function closeAllMIDIInputs(){
-  inputsMap.forEach(function(input){
+  midiInputs.forEach(function(input){
     //input.close();
     input._jazzInstance.MidiInClose();
   });
+}
+
+
+export function getMIDIDeviceId(name, type){
+  let id;
+  if(type === 'input'){
+    id = midiInputIds.get(name);
+    if(id === undefined){
+      id = generateUUID();
+      midiInputIds.set(name, id);
+    }
+  }else if(type === 'output'){
+    id = midiOutputIds.get(name);
+    if(id === undefined){
+      id = generateUUID();
+      midiOutputIds.set(name, id);
+    }
+  }
+  return id;
 }
 
