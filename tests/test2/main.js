@@ -26,11 +26,12 @@ window.onload = function(){
         midiAccess.onstatechange = function(e){
           var port = e.port;
           var div = port.type === 'input' ? divInputs : divOutputs;
+          var listener = port.type === 'input' ? checkboxMIDIInOnChange : checkboxMIDIOutOnChange;
           var checkbox = document.getElementById(port.id);
           var label;
 
           // device disconnected
-          if(port.state === 'disconnected' && checkbox !== null){
+          if(port.state === 'disconnected'){
             div.removeChild(checkbox.parentNode.nextSibling); // remove the <br> after the checkbox
             div.removeChild(checkbox.parentNode); // remove the label and the checkbox
             port.close();
@@ -40,7 +41,12 @@ window.onload = function(){
           // new device connected
           }else if(checkbox === null){
             label = document.createElement('label');
-            label.innerHTML = '<input type="checkbox" id="' + port.id + '">' + port.name + ' (' + port.state + ', ' +  port.connection + ')';
+            checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.id = port.id;
+            checkbox.addEventListener('change', listener, false);
+            label.appendChild(checkbox);
+            label.appendChild(document.createTextNode(port.name + ' (' + port.state + ', ' +  port.connection + ')'));
             div.appendChild(label);
             div.appendChild(document.createElement('br'));
           }
