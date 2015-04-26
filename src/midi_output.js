@@ -1,13 +1,14 @@
 'use strict';
 
+import {getDevice, generateUUID} from './util';
 
 export class MIDIOutput{
   constructor(info, instance){
-    this.id = info[0];
+    this.id = generateUUID();
     this.name = info[0];
     this.manufacturer = info[1];
     this.version = info[2];
-    this.type = 'input';
+    this.type = 'output';
     this.state = 'closed';
     this.connection = 'connected';
     this.onmidimessage = null;
@@ -19,16 +20,22 @@ export class MIDIOutput{
 
     this._jazzInstance = instance;
     this._jazzInstance.outputInUse = true;
-    this._jazzInstance.MidiOutOpen(this.name);
+    if(getDevice().platform === 'linux'){
+      this._jazzInstance.MidiOutOpen(this.name);
+    }
   }
 
   open(){
-    //this._jazzInstance.MidiOutOpen(this.name);
+    if(getDevice().platform !== 'linux'){
+      this._jazzInstance.MidiOutOpen(this.name);
+    }
     this.state = 'open';
   }
 
   close(){
-    //this._jazzInstance.MidiOutClose(this.name);
+    if(getDevice().platform !== 'linux'){
+      this._jazzInstance.MidiOutClose(this.name);
+    }
     this.state = 'closed';
   }
 
@@ -51,5 +58,9 @@ export class MIDIOutput{
       this._jazzInstance.MidiOutLong(data);
     }
     return true;
+  }
+
+  dispatchEvent(evt){
+
   }
 }

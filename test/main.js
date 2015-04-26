@@ -17,7 +17,7 @@ window.onload = function(){
       function onFulfilled(access, options){
         MIDIAccess = access;
         MIDIAccess.onstatechange = function(e){
-          console.log('MIDIAccess.statechange', e);
+          console.log('MIDIAccess', e);
           showMIDIPorts();
         };
         showMIDIPorts();
@@ -71,14 +71,14 @@ window.onload = function(){
           activeInputs[id] = port;
           // implicitly open port by adding a listener
           //port.onmidimessage = inputListener;
-          //port.open();
           port.addEventListener('midimessage', function(e){
             inputListener(e);
             //console.log('addEventListener', e);
           });
-          // port.addEventListener('statechange', function(e){
-          //     console.log('port.statechange', e);
-          // });
+          port.addEventListener('statechange', function(e){
+            console.log('MIDIPort', e);
+          });
+          port.open();
         }else{
           delete activeInputs[id];
           port.close();
@@ -137,8 +137,6 @@ window.onload = function(){
 
 
   function inputListener(midimessageEvent){
-    console.log(midimessageEvent);
-    return
     var port, portId,
       data = midimessageEvent.data,
       type = data[0],

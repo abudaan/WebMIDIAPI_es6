@@ -3,14 +3,23 @@
 import {createJazzInstance, getJazzInstance} from './jazz';
 import {MIDIInput} from './midi_input';
 import {MIDIOutput} from './midi_output';
+import {MIDIConnectionEvent} from './midiconnection_event';
 
+
+let midiAccess;
 let jazzInstance;
 let inputsMap = new Map();
 let outputsMap = new Map();
-let midiAccess = {
-  sysexEnabled: true
-};
 let listeners = new Set();
+
+
+class MIDIAccess{
+  constructor(inputsMap, outputsMap){
+    this.sysexEnabled = true;
+    this.inputs = inputsMap;
+    this.outputs = outputsMap;
+  }
+}
 
 export function createMIDIAccess(){
 
@@ -26,8 +35,7 @@ export function createMIDIAccess(){
 
       createMIDIPorts(function(){
         setupListeners();
-        midiAccess.inputs = inputsMap;
-        midiAccess.outputs = outputsMap;
+        midiAccess = new MIDIAccess(inputsMap, outputsMap);
         resolve(midiAccess);
       });
     });
@@ -68,15 +76,15 @@ function createMIDIPort(type, name, callback){
         info = instance.MidiInInfo(name);
       }
       port = new MIDIInput(info, instance);
-      inputsMap.set(name, port);
+      inputsMap.set(port.id, port);
     }else if(type === 'output'){
       if(instance.Support('MidiOutInfo')){
         info = instance.MidiOutInfo(name);
       }
       port = new MIDIOutput(info, instance);
-      outputsMap.set(name, port);
+      outputsMap.set(port.id, port);
     }
-    callback();
+    callback(port);
   });
 }
 
@@ -98,8 +106,8 @@ function setupListeners(){
     if(port !== undefined){
       port.close();
       port._jazzInstance.inputInUse = false;
-      inputsMap.delete(name);
-      dispatchEvent();
+      inputsMap.delete(port.id);
+      dispatchEvent(port);
     }
   });
 
@@ -108,20 +116,20 @@ function setupListeners(){
     if(port !== undefined){
       port.close();
       port._jazzInstance.outputInUse = false;
-      outputsMap.delete(name);
-      dispatchEvent();
+      outputsMap.delete(port.id);
+      dispatchEvent(port);
     }
   });
 
   jazzInstance.OnConnectMidiIn(function(name){
-    createMIDIPort('input', name, function(){
-      dispatchEvent();
+    createMIDIPort('input', name, function(port){
+      dispatchEvent(port);
     });
   });
 
   jazzInstance.OnConnectMidiOut(function(name){
-    createMIDIPort('output', name, function(){
-      dispatchEvent();
+    createMIDIPort('output', name, function(port){
+      dispatchEvent(port);
     });
   });
 }
@@ -147,12 +155,14 @@ function removeEventListener(type, listener, useCapture){
 }
 
 
-function dispatchEvent(){
-  // create MIDIConnectionEvent (note: IE does not support CustomEvent)
-  let evt = new CustomEvent('statechange');
-  evt.initEvent('statechange')
-  if(midiAccess.onstatechange){
-    midiAccess.onstatechange();
+export function dispatchEvent(port){
+
+  port.dispatchEvent(new MIDIConnectionEvent(port, port));
+
+  let evt = new MIDIConnectionEvent(midiAccess, port);
+
+  if(typeof midiAccess.onstatechange === 'function'){
+    midiAccess.onstatechange(evt);
   }
   for(let listener of listeners){
     listener(evt);
