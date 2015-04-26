@@ -10,11 +10,11 @@ export class MIDIOutput{
     this.version = info[2];
     this.type = 'output';
     this.state = 'connected';
-    this.connection = 'closed';
+    this.connection = 'pending';
     this.onmidimessage = null;
     this.onstatechange = null;
 
-    this._listeners = new Map();
+    this._listeners = new Set();
     this._inLongSysexMessage = false;
     this._sysexBuffer = new Uint8Array();
 
@@ -66,7 +66,33 @@ export class MIDIOutput{
     return true;
   }
 
-  dispatchEvent(evt){
+  addEventListener(type, listener, useCapture){
+    if(type !== 'statechange'){
+      return;
+    }
 
+    if(this._listeners.has(listener) === false){
+      this._listeners.add(listener);
+    }
+  }
+
+  removeEventListener(type, listener, useCapture){
+    if(type !== 'statechange'){
+      return;
+    }
+
+    if(this._listeners.has(listener) === false){
+      this._listeners.delete(listener);
+    }
+  }
+
+  dispatchEvent(evt){
+    this._listeners.forEach(function(listener){
+      listener(evt);
+    });
+
+    if(this._onstatechange !== null){
+      this._onstatechange(evt);
+    }
   }
 }

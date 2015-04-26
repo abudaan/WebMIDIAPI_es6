@@ -6,7 +6,9 @@ window.onload = function(){
     divLog = document.getElementById('log'),
     divInputs = document.getElementById('inputs'),
     divOutputs = document.getElementById('outputs'),
-    MIDIAccess,
+    midiAccess,
+    checkboxMIDIInOnChange,
+    checkboxMIDIOutOnChange,
     activeInputs = {},
     activeOutputs = {};
 
@@ -15,36 +17,38 @@ window.onload = function(){
     navigator.requestMIDIAccess().then(
 
       function onFulfilled(access, options){
-        MIDIAccess = access;
+        midiAccess = access;
 
-        MIDIAccess.onstatechange = function(e){
+        // create list of all currently connected MIDI devices
+        showMIDIPorts();
+
+        // update the device list when devices get connected, disconnected, opened or closed
+        midiAccess.onstatechange = function(e){
           var port = e.port;
           var div = port.type === 'input' ? divInputs : divOutputs;
           var checkbox = document.getElementById(port.id);
           var label;
 
-          if(port.state === 'disconnected'){
-            label = checkbox.parentNode;
-            div.removeChild(label.nextSibling);
-            div.removeChild(label);
+          // device disconnected
+          if(port.state === 'disconnected' && checkbox !== null){
+            div.removeChild(checkbox.parentNode.nextSibling); // remove the <br> after the checkbox
+            div.removeChild(checkbox.parentNode); // remove the label and the checkbox
+            port.close();
             delete activeInputs[port.id];
             delete activeOutputs[port.id];
+
+          // new device connected
           }else if(checkbox === null){
             label = document.createElement('label');
             label.innerHTML = '<input type="checkbox" id="' + port.id + '">' + port.name + ' (' + port.state + ', ' +  port.connection + ')';
             div.appendChild(label);
             div.appendChild(document.createElement('br'));
-          }else{
-            label = checkbox.parentNode;
-            checkbox.nextSibling.nodeValue = port.name + ' (' + port.state + ', ' +  port.connection + ')';
           }
         };
-
-        showMIDIPorts();
-       },
+      },
 
       function onRejected(e){
-        divInputs.innerHTML = 'No access to MIDI devices:' + e;
+        divInputs.innerHTML = 'No access to MIDI devices:' + e.code;
         divOutputs.innerHTML = '';
       }
     );
@@ -57,89 +61,43 @@ window.onload = function(){
   }
 
 
-  function checkboxMIDIInListener(){
-
-  }
-
-  function checkboxMIDIOutListener(){
-
-  }
-
-
-
   function showMIDIPorts(){
     var
       html,
       checkbox,
       checkboxes,
       inputs, outputs,
-      i, maxi, id, port;
+      i, maxi;
 
-    inputs = MIDIAccess.inputs;
+    inputs = midiAccess.inputs;
     html = '<h4>midi inputs:</h4>';
     inputs.forEach(function(port){
       html += '<label><input type="checkbox" id="' + port.id + '">' + port.name + ' (' + port.state + ', ' +  port.connection + ')</label><br>';
     });
     divInputs.innerHTML = html;
 
-
-    outputs = MIDIAccess.outputs;
+    outputs = midiAccess.outputs;
     html = '<h4>midi outputs:</h4>';
     outputs.forEach(function(port){
       html += '<label><input type="checkbox" id="' + port.id + '">' + port.name + ' (' + port.state + ', ' +  port.connection + ')</label><br>';
     });
     divOutputs.innerHTML = html;
 
-
     checkboxes = document.querySelectorAll('#inputs input[type="checkbox"]');
-
     for(i = 0, maxi = checkboxes.length; i < maxi; i++){
       checkbox = checkboxes[i];
-      checkbox.addEventListener('change', function(){
-        // get port by id
-        id = this.id;
-        port = inputs.get(id);
-        if(this.checked === true){
-          activeInputs[id] = port;
-          // implicitly open port by adding a listener
-          //port.onmidimessage = inputListener;
-          port.addEventListener('midimessage', function(e){
-            inputListener(e);
-            //console.log('addEventListener', e);
-          });
-          port.addEventListener('statechange', function(e){
-            console.log('MIDIPort', e.port);
-          });
-          port.open();
-        }else{
-          delete activeInputs[id];
-          port.close();
-        }
-        //console.log(activeInputs);
-      }, false);
+      checkbox.addEventListener('change', checkboxMIDIInOnChange, false);
     }
 
-
     checkboxes = document.querySelectorAll('#outputs input[type="checkbox"]');
-
     for(i = 0, maxi = checkboxes.length; i < maxi; i++){
       checkbox = checkboxes[i];
-      checkbox.addEventListener('change', function(){
-        // get port by id
-        id = this.id;
-        port = outputs.get(id);
-        if(this.checked === true){
-          activeOutputs[id] = port;
-          port.open();
-        }else{
-          delete activeOutputs[id];
-          port.close();
-        }
-      }, false);
+      checkbox.addEventListener('change', checkboxMIDIOutOnChange, false);
     }
   }
 
 
+  // handle incoming MIDI messages
   function inputListener(midimessageEvent){
     var port, portId,
       data = midimessageEvent.data,
@@ -157,5 +115,44 @@ window.onload = function(){
       }
     }
   }
+
+
+  checkboxMIDIInOnChange = function(){
+    // port id is the same a the checkbox id
+    var id = this.id;
+    var port = midiAccess.inputs.get(id);
+    var cb = this;
+    if(this.checked === true){
+      activeInputs[id] = port;
+      port.addEventListener('midimessage', inputListener, false);
+      port.addEventListener('statechange', function(){
+        cb.nextSibling.nodeValue = port.name + ' (' + port.state + ', ' +  port.connection + ')';
+      }, false);
+      // we have to open the port explicitly because we don't use port.onmidimessage this time
+      port.open();
+    }else{
+      delete activeInputs[id];
+      // port.close() will also remove all eventlisteners
+      port.close();
+    }
+  };
+
+
+  checkboxMIDIOutOnChange = function(){
+    // port id is the same a the checkbox id
+    var id = this.id;
+    var port = midiAccess.outputs.get(id);
+    var cb = this;
+    if(this.checked === true){
+      activeOutputs[id] = port;
+      port.addEventListener('statechange', function(){
+        cb.nextSibling.nodeValue = port.name + ' (' + port.state + ', ' +  port.connection + ')';
+      }, false);
+      port.open();
+    }else{
+      delete activeOutputs[id];
+      port.close();
+    }
+  };
 
 };

@@ -16,7 +16,7 @@ export class MIDIInput{
     this.version = info[2];
     this.type = 'input';
     this.state = 'connected';
-    this.connection = 'closed';
+    this.connection = 'pending';
 
     this._onmidimessage = null;
     this._onstatechange = null;
@@ -111,8 +111,8 @@ export class MIDIInput{
     }
     this.connection = 'closed';
     dispatchEvent(this); // dispatch event via MIDIAccess
-    this.onmidimessage = null;
-    this.onstatechange = null;
+    this._onmidimessage = null;
+    this._onstatechange = null;
     this._listeners.get('midimessage').clear();
     this._listeners.get('statechange').clear();
   }
