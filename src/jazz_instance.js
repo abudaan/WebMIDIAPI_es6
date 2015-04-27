@@ -2,7 +2,10 @@
 
 // required for Internet Explorer only
 // the require statement has to be put here; if you put it at the entry point (shim.js) it doesn't work (weird quirck in IE?)
-require('babelify/polyfill');
+//require('babelify/polyfill');
+require('babelify/node_modules/babel-core/node_modules/core-js/es6/map');
+require('babelify/node_modules/babel-core/node_modules/core-js/es6/set');
+//require('babelify/node_modules/babel-core/node_modules/core-js/es6/array');
 
 import {getDevice} from './util';
 
