@@ -72,7 +72,15 @@ export function getJazzInstance(type, callback){
   let instance = null;
   let key = type === 'input' ? 'inputInUse' : 'outputInUse';
 
-  for(let inst of jazzInstances.values()){
+  // for(let inst of jazzInstances.values()){
+  //   if(inst[key] !== true){
+  //       instance = inst;
+  //       break;
+  //   }
+  // }
+  let values = jazzInstances.values();
+  for(let i = 0, maxi = values.length; i < maxi; i++){
+    let inst = values[i];
     if(inst[key] !== true){
         instance = inst;
         break;

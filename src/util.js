@@ -133,10 +133,44 @@ export function generateUUID(){
 }
 
 
+export function polyfillPromise(){
+  if(typeof window.Promise !== 'function'){
+
+    window.Promise = function(executor) {
+      this.executor = executor;
+    };
+
+    Promise.prototype.then = function(accept, reject) {
+      if(typeof accept !== 'function'){
+        accept = function(){};
+      }
+      if(typeof reject !== 'function'){
+        reject = function(){};
+      }
+      this.executor(accept, reject);
+    };    
+  }
+}
+
+export function polyfillMap(){
+  let map = new Map();
+  if(typeof map.values !== 'function'){
+    Map.prototype.values = function(){
+      let values = [];
+      this.forEach(function(value){
+        values.push(value);
+      });
+      return values;
+    }
+  }
+}
+
 export function polyfill(){
   let device = getDevice();
   // if(device.browser === 'ie'){
   //   polyfillCustomEvent();
   // }
+  polyfillPromise();
+  polyfillMap();
   polyfillPerformance();
 }
