@@ -45,28 +45,22 @@ So, some sample usage:
 
 ##Examples
 
-- [test1](http://abudaan.github.io/WebMIDIAPIShim_es6/tests/test1)
-- [test2a](http://abudaan.github.io/WebMIDIAPIShim_es6/tests/test2a)
-- [test2b](http://abudaan.github.io/WebMIDIAPIShim_es6/tests/test2b)
+- [test1](http://abudaan.github.io/WebMIDIAPIShim_es6/tests/test1) simple listing of all MIDI devices
+- [test2a](http://abudaan.github.io/WebMIDIAPIShim_es6/tests/test2a) routing example
+- [test2b](http://abudaan.github.io/WebMIDIAPIShim_es6/tests/test2b) same routing example in slightly different code
 
 
-## Dependencies
-The project has 2 dependencies:
+## Building the shim
 
-* [Node.js](http://nodejs.org/)
-* [npm](https://www.npmjs.org/)
+You need to have [Node.js](http://nodejs.org/) and [npm](https://www.npmjs.org/) installed.
 
-
-## Installing
-Install the project dependencies using:
+Then install the project dependencies using:
 
     npm install
 
 This will install a.o. browserify and babelify.
 
-
-## Commands
-All code is written in es6 so you need to transpile the javascript code before it can run in a browser.
+The shim is written in es6 so you need to transpile it before it can run in a browser.
 
 Start watchify and transpile code as soon as a file has changed:
 
