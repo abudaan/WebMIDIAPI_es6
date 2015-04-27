@@ -16,7 +16,7 @@ window.onload = function(){
   if(navigator.requestMIDIAccess !== undefined){
     navigator.requestMIDIAccess().then(
 
-      function onFulfilled(access, options){
+      function onFulfilled(access){
         midiAccess = access;
 
         // create list of all currently connected MIDI devices
@@ -62,7 +62,7 @@ window.onload = function(){
       },
 
       function onRejected(e){
-        divInputs.innerHTML = 'No access to MIDI devices:' + e.code;
+        divInputs.innerHTML = e.message;
         divOutputs.innerHTML = '';
       }
     );
@@ -70,7 +70,7 @@ window.onload = function(){
 
   // browsers without WebMIDI API or Jazz plugin
   else{
-    divInputs.innerHTML = 'No access to MIDI devices';
+    divInputs.innerHTML = 'No access to MIDI devices: browser does not support WebMIDI API, please use the WebMIDIAPIShim together with the Jazz plugin';
     divOutputs.innerHTML = '';
   }
 

@@ -1,6 +1,6 @@
 'use strict';
 
-import {createJazzInstance, getJazzInstance} from './jazz';
+import {createJazzInstance, getJazzInstance} from './jazz_instance';
 import {MIDIInput} from './midi_input';
 import {MIDIOutput} from './midi_output';
 import {MIDIConnectionEvent} from './midiconnection_event';
@@ -53,7 +53,7 @@ export function createMIDIAccess(){
 
     createJazzInstance(function(instance){
       if(instance === undefined){
-        reject({code: 1});
+        reject({message: 'No access to MIDI devices: browser does not support the WebMIDI API and the Jazz plugin is not installed.'});
         return;
       }
 

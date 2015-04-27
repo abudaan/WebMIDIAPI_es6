@@ -16,14 +16,14 @@ window.onload = function(){
   if(navigator.requestMIDIAccess !== undefined){
     navigator.requestMIDIAccess().then(
 
-      function onFulfilled(access, options){
+      function onFulfilled(access){
         midiAccess = access;
 
         // create list of all currently connected MIDI devices
         showMIDIPorts();
 
         // update the device list when devices get connected, disconnected, opened or closed
-        midiAccess.onstatechange = function(e){
+        midiAccess.addEventListener('statechange', function(e){
           var port = e.port;
           var div = port.type === 'input' ? divInputs : divOutputs;
           var listener = port.type === 'input' ? checkboxMIDIInOnChange : checkboxMIDIOutOnChange;
@@ -50,19 +50,19 @@ window.onload = function(){
             div.appendChild(label);
             div.appendChild(document.createElement('br'));
           }
-        };
+        }, false);
       },
 
       function onRejected(e){
-        divInputs.innerHTML = 'No access to MIDI devices:' + e.code;
+        divInputs.innerHTML = e.message;
         divOutputs.innerHTML = '';
       }
     );
   }
 
-  // browsers without WebMIDI API or Jazz plugin
+  // browsers without WebMIDI API and WebMIDIAPIShim not present
   else{
-    divInputs.innerHTML = 'No access to MIDI devices';
+    divInputs.innerHTML = 'No access to MIDI devices: browser does not support WebMIDI API, please use the WebMIDIAPIShim together with the Jazz plugin';
     divOutputs.innerHTML = '';
   }
 

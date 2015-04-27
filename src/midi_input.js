@@ -120,10 +120,9 @@ export class MIDIInput{
     this._sysexBuffer = tmpBuffer;
   }
 
-
   _bufferLongSysex(data, initialOffset){
     let j = initialOffset;
-    while(j <data.length){
+    while(j < data.length){
       if(data[j] == 0xF7){
         // end of sysex!
         j++;
@@ -152,7 +151,7 @@ midiProc = function(timestamp, data){
     let isValidMessage = true;
     if(this._inLongSysexMessage){
       i = this._bufferLongSysex(data, i);
-      if(data[i-1] != 0xf7){
+      if(data[i - 1] != 0xf7){
         // ran off the end without hitting the end of the sysex message
         return;
       }
@@ -181,8 +180,8 @@ midiProc = function(timestamp, data){
         case 0xF0:
           switch(data[i]){
             case 0xf0:  // letiable-length sysex.
-              i = this._bufferLongSysex(data,i);
-              if(data[i-1] != 0xf7){
+              i = this._bufferLongSysex(data, i);
+              if(data[i - 1] != 0xf7){
                 // ran off the end without hitting the end of the sysex message
                 return;
               }
