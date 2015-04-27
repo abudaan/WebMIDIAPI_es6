@@ -28,7 +28,7 @@ class MIDIAccess{
       return;
     }
     if(listeners.has(listener) === false){
-      listeners.set(listener);
+      listeners.add(listener);
     }
   }
 

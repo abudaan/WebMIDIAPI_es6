@@ -31,7 +31,7 @@ window.onload = function(){
           var label;
 
           // device disconnected
-          if(port.state === 'disconnected'){
+          if(port.state === 'disconnected' && checkbox !== null){
             div.removeChild(checkbox.parentNode.nextSibling); // remove the <br> after the checkbox
             div.removeChild(checkbox.parentNode); // remove the label and the checkbox
             port.close();
@@ -39,7 +39,7 @@ window.onload = function(){
             delete activeOutputs[port.id];
 
           // new device connected
-          }else if(checkbox === null){
+          }else if(port.state === 'connected' && checkbox === null){
             label = document.createElement('label');
             checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
