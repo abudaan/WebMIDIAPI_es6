@@ -42,7 +42,7 @@ export class MIDIOutput{
       return;
     }
     if(getDevice().platform !== 'linux'){
-      this._jazzInstance.MidiOutClose(this.name);
+      this._jazzInstance.MidiOutClose();
     }
     this.connection = 'closed';
     dispatchEvent(this); // dispatch event via MIDIAccess
