@@ -45,9 +45,9 @@ So, some sample usage:
 
 ##Examples
 
-- [test1](tests/test1)
-- [test2a](tests/test2a)
-- [test2b](tests/test2b)
+- [test1](http://abudaan.github.io/WebMIDIAPIShim_es6/tests/test1)
+- [test2a](http://abudaan.github.io/WebMIDIAPIShim_es6/tests/test2a)
+- [test2b](http://abudaan.github.io/WebMIDIAPIShim_es6/tests/test2b)
 
 
 ## Dependencies
