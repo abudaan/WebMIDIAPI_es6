@@ -1,12 +1,23 @@
 {
-  "name": "WebMIDIAPIShim",
-  "private": false,
+  "name": "WebMIDIAPIShim_es6",
   "devDependencies": {
     "babelify": ">=6.0.0",
     "browserify": ">=8.1.1",
     "exorcist": "^0.1.6",
-    "watchify": ">=1.0.1"
+    "watchify": ">=1.0.1",
+    "jazz-midi": "^1.4.0",
+    "performance-now": ">=0.2.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abudaan/WebMIDIAPIShim.git"
+  },
+  "keywords": [
+    "midi",
+    "music",
+    "sound"
+  ],
+  "license": "Apache-2.0",
   "engines": {
     "node": "0.10.x"
   },

@@ -13,20 +13,17 @@ export function getDevice(){
     browser = 'undetected',
     nodejs = false;
 
-  if(navigator === undefined){
-    nodejs = (typeof __dirname !== 'undefined' && window.jazzMidi);
-    if(nodejs === true){
-      platform = process.platform;
-    }
+  nodejs = (typeof __dirname !== 'undefined') && (window.jazzMidi !== undefined);
+
+  if(nodejs === true){
+    platform = process.platform;
     device = {
       platform: platform,
-      browser: false,
       nodejs: nodejs,
       mobile: platform === 'ios' || platform === 'android'
     };
     return device;
   }
-
 
   let ua = navigator.userAgent;
 
@@ -83,7 +80,6 @@ export function polyfillPerformance(){
   if(window.performance === undefined){
     window.performance = {};
   }
-
   Date.now = (Date.now || function(){
     return new Date().getTime();
   });
@@ -92,8 +88,8 @@ export function polyfillPerformance(){
 
     let nowOffset = Date.now();
 
-    if(performance.timing !== undefined && performance.timing.navigationStart !== undefined){
-      nowOffset = performance.timing.navigationStart;
+    if(window.performance.timing !== undefined && window.performance.timing.navigationStart !== undefined){
+      nowOffset = window.performance.timing.navigationStart;
     }
 
     window.performance.now = function now(){
@@ -115,14 +111,14 @@ export function generateUUID(){
 }
 
 
-export function polyfillPromise(){
-  if(typeof window.Promise !== 'function'){
+export function polyfillPromise(scope){
+  if(typeof scope.Promise !== 'function'){
 
-    window.Promise = function(executor) {
+    scope.Promise = function(executor) {
       this.executor = executor;
     };
 
-    Promise.prototype.then = function(accept, reject) {
+    scope.Promise.prototype.then = function(accept, reject) {
       if(typeof accept !== 'function'){
         accept = function(){};
       }
@@ -137,8 +133,10 @@ export function polyfillPromise(){
 
 export function polyfill(){
   let device = getDevice();
-  if(device.browser.indexOf('ie') !== -1){
-    polyfillPromise();
+  if(device.browser === 'ie'){
+    polyfillPromise(window);
+  }else if(device.nodejs === true){
+    polyfillPromise(global);
   }
   polyfillPerformance();
 }

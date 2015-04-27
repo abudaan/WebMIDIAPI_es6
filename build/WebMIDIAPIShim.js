@@ -1870,7 +1870,7 @@ var midiAccess = undefined;
 })();
 
 },{"./midi_access":33,"./util":39}],39:[function(require,module,exports){
-(function (process,__dirname){
+(function (process,global,__dirname){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -1895,14 +1895,12 @@ function getDevice() {
       browser = 'undetected',
       nodejs = false;
 
-  if (navigator === undefined) {
-    nodejs = typeof __dirname !== 'undefined' && window.jazzMidi;
-    if (nodejs === true) {
-      platform = process.platform;
-    }
+  nodejs = typeof __dirname !== 'undefined' && window.jazzMidi !== undefined;
+
+  if (nodejs === true) {
+    platform = process.platform;
     device = {
       platform: platform,
-      browser: false,
       nodejs: nodejs,
       mobile: platform === 'ios' || platform === 'android'
     };
@@ -1963,7 +1961,6 @@ function polyfillPerformance() {
   if (window.performance === undefined) {
     window.performance = {};
   }
-
   Date.now = Date.now || function () {
     return new Date().getTime();
   };
@@ -1973,8 +1970,8 @@ function polyfillPerformance() {
 
       var nowOffset = Date.now();
 
-      if (performance.timing !== undefined && performance.timing.navigationStart !== undefined) {
-        nowOffset = performance.timing.navigationStart;
+      if (window.performance.timing !== undefined && window.performance.timing.navigationStart !== undefined) {
+        nowOffset = window.performance.timing.navigationStart;
       }
 
       window.performance.now = function now() {
@@ -1995,14 +1992,14 @@ function generateUUID() {
   return uuid;
 }
 
-function polyfillPromise() {
-  if (typeof window.Promise !== 'function') {
+function polyfillPromise(scope) {
+  if (typeof scope.Promise !== 'function') {
 
-    window.Promise = function (executor) {
+    scope.Promise = function (executor) {
       this.executor = executor;
     };
 
-    Promise.prototype.then = function (accept, reject) {
+    scope.Promise.prototype.then = function (accept, reject) {
       if (typeof accept !== 'function') {
         accept = function () {};
       }
@@ -2016,13 +2013,15 @@ function polyfillPromise() {
 
 function polyfill() {
   var device = getDevice();
-  if (device.browser.indexOf('ie') !== -1) {
-    polyfillPromise();
+  if (device.browser === 'ie') {
+    polyfillPromise(window);
+  } else if (device.nodejs === true) {
+    polyfillPromise(global);
   }
   polyfillPerformance();
 }
 
-}).call(this,require('_process'),"/src")
+}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},"/src")
 
 },{"_process":31}]},{},[38])
 
