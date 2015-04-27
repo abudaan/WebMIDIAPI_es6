@@ -58,7 +58,7 @@ export function getDevice(){
   }else if(ua.indexOf('Trident') !== -1){
     browser = 'ie';
     if(ua.indexOf('MSIE 9') !== -1){
-      browser = 'ie 9';
+      browser = 'ie9';
     }
   }
 
@@ -130,63 +130,15 @@ export function polyfillPromise(){
         reject = function(){};
       }
       this.executor(accept, reject);
-    };    
+    };
   }
 }
 
-
-// credits: https://gist.github.com/1057924
-export function polyfillTypedArrays(){
-  try {
-    var a = new Uint8Array(1);
-    return; //no need
-  } catch(e) { }
-
-  function subarray(start, end) {
-    return this.slice(start, end);
-  }
-
-  function set_(array, offset) {
-    if (arguments.length < 2) offset = 0;
-    for (var i = 0, n = array.length; i < n; ++i, ++offset){
-      this[offset] = array[i] & 0xFF;
-    }
-  }
-
-  // we need typed arrays
-  function TypedArray(arg1) {
-    var result;
-    if(typeof arg1 === "number") {
-      result = new Array(arg1);
-      for (var i = 0; i < arg1; ++i){
-        result[i] = 0;
-      }
-    }else if(typeof arg1 === 'array'){
-      result = arg1.slice(0);
-    }else{
-      result = new Array();
-    }
-    result.subarray = subarray;
-    result.buffer = result;
-    result.byteLength = result.length;
-    result.set = set_;
-    if(typeof arg1 === "object" && arg1.buffer){
-      result.buffer = arg1.buffer;
-    }
-
-    return result;
-  }
-
-  window.Uint8Array = TypedArray;
-  window.Uint32Array = TypedArray;
-  window.Int32Array = TypedArray;  
-}
 
 export function polyfill(){
   let device = getDevice();
   if(device.browser.indexOf('ie') !== -1){
     polyfillPromise();
-    polyfillTypedArrays();  
   }
   polyfillPerformance();
 }

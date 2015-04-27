@@ -1,7 +1,12 @@
 'use strict';
 
-// required for Internet Explorer only
-// the require statement has to be put here; if you put it at the entry point (shim.js) it doesn't work (weird quirck in IE?)
+/*
+  The require statements are only needed for Internet Explorer. They have to be put here;
+  if you put them at the top entry point (shim.js) it doesn't work (weird quirck in IE?).
+
+  Note that you can remove the require statements if you don't need (or want) to support Internet Explorer:
+  that will shrink the filesize of the WebMIDIAPIShim to about 50%.
+*/
 require('babelify/node_modules/babel-core/node_modules/core-js/es6/map');
 require('babelify/node_modules/babel-core/node_modules/core-js/es6/set');
 require('babelify/node_modules/babel-core/node_modules/core-js/es6/symbol');
