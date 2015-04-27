@@ -51,10 +51,10 @@ export function createMIDIAccess(){
       return;
     }
 
-    if(getDevice().browser === 'ie 9'){
-      reject({message: 'Only Internet Explorer 10 and above are supported.'})
-      return;
-    }
+    // if(getDevice().browser === 'ie 9'){
+    //   reject({message: 'Only Internet Explorer 10 and above are supported.'})
+    //   return;
+    // }
 
     createJazzInstance(function(instance){
       if(instance === undefined){

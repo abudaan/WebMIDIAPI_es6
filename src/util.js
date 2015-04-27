@@ -102,24 +102,6 @@ export function polyfillPerformance(){
   }
 }
 
-export function polyfillCustomEvent(){
-
-  if(typeof window.Event === 'function'){
-    return;
-  }
-
-  function CustomEvent(event, params){
-    params = params || {bubbles: false, cancelable: false, detail: undefined};
-    var evt = document.createEvent('CustomEvent');
-    evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
-    return evt;
-  };
-
-  CustomEvent.prototype = window.Event.prototype;
-  window.CustomEvent = CustomEvent;
-  window.CustomEvent = CustomEvent;
-}
-
 
 export function generateUUID(){
   let d = new Date().getTime();
@@ -152,18 +134,6 @@ export function polyfillPromise(){
   }
 }
 
-export function polyfillMap(){
-  let map = new Map();
-  if(typeof map.values !== 'function'){
-    Map.prototype.values = function(){
-      let values = [];
-      this.forEach(function(value){
-        values.push(value);
-      });
-      return values;
-    }
-  }
-}
 
 // credits: https://gist.github.com/1057924
 export function polyfillTypedArrays(){
@@ -191,8 +161,10 @@ export function polyfillTypedArrays(){
       for (var i = 0; i < arg1; ++i){
         result[i] = 0;
       }
-    }else{
+    }else if(typeof arg1 === 'array'){
       result = arg1.slice(0);
+    }else{
+      result = new Array();
     }
     result.subarray = subarray;
     result.buffer = result;
@@ -213,9 +185,7 @@ export function polyfillTypedArrays(){
 export function polyfill(){
   let device = getDevice();
   if(device.browser.indexOf('ie') !== -1){
-    //polyfillCustomEvent();
-    //polyfillPromise();
-    //polyfillMap();
+    polyfillPromise();
     polyfillTypedArrays();  
   }
   polyfillPerformance();
