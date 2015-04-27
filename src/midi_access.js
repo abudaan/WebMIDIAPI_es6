@@ -4,7 +4,7 @@ import {createJazzInstance, getJazzInstance} from './jazz_instance';
 import {MIDIInput} from './midi_input';
 import {MIDIOutput} from './midi_output';
 import {MIDIConnectionEvent} from './midiconnection_event';
-import {generateUUID} from './util';
+import {getDevice, generateUUID} from './util';
 
 
 let midiAccess;
@@ -48,6 +48,11 @@ export function createMIDIAccess(){
 
     if(midiAccess !== undefined){
       resolve(midiAccess);
+      return;
+    }
+
+    if(getDevice().browser === 'ie 9'){
+      reject({message: 'Only Internet Explorer 10 and above are supported.'})
       return;
     }
 

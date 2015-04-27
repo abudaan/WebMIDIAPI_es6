@@ -1,5 +1,9 @@
 'use strict';
 
+// required for Internet Explorer only
+// the require statement has to be put here; if you put it at the entry point (shim.js) it doesn't work (weird quirck in IE?)
+require('babelify/polyfill');
+
 import {getDevice} from './util';
 
 const jazzPluginInitTime = 100; // milliseconds
@@ -72,15 +76,7 @@ export function getJazzInstance(type, callback){
   let instance = null;
   let key = type === 'input' ? 'inputInUse' : 'outputInUse';
 
-  // for(let inst of jazzInstances.values()){
-  //   if(inst[key] !== true){
-  //       instance = inst;
-  //       break;
-  //   }
-  // }
-  let values = jazzInstances.values();
-  for(let i = 0, maxi = values.length; i < maxi; i++){
-    let inst = values[i];
+  for(let inst of jazzInstances.values()){
     if(inst[key] !== true){
         instance = inst;
         break;

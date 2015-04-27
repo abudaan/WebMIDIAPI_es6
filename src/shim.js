@@ -1,8 +1,5 @@
 'use strict';
 
-// required by babelify for transpiling es6
-//require('babelify/polyfill');
-
 import {createMIDIAccess, closeAllMIDIInputs} from './midi_access';
 import {polyfill, getDevice} from './util';
 
@@ -25,3 +22,5 @@ let midiAccess;
     }
   }
 }());
+
+export {};
