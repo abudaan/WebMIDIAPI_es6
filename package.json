@@ -21,7 +21,7 @@
     "email": "info@jazz-soft.net",
     "url": "http://jazz-soft.net"
     },{
-    "name": "Daniel van der Meer",
+    "name": "abudaan",
     "email": "daniel@abumarkub.net",
     "url": "http://github.com/abudaan"
     }
@@ -46,9 +46,7 @@
     "babelify": ">=6.0.0",
     "browserify": ">=8.1.1",
     "exorcist": "^0.1.6",
-    "watchify": ">=1.0.1",
-    "jazz-midi": "^1.4.0",
-    "performance-now": ">=0.2.0"
+    "watchify": ">=1.0.1"
   },
   "engines": {
     "node": "0.10.x"

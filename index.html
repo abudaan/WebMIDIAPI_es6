@@ -84,8 +84,8 @@ function success( midiAccess ) {
     log.innerHTML += inputs.size+" inputs:\n";
 
     i = 0;
-    inputs.forEach(function(key, value){
-        log.innerHTML += i++ + ": " + value.name + "; manufacturer: " + value.manufacturer + "; version: " + value.version + "\n";
+    inputs.forEach(function(port){
+        log.innerHTML += i++ + ": " + port.name + "; manufacturer: " + port.manufacturer + "; version: " + port.version + "\n";
     });
 
     if(inputs.size > 0) {
@@ -99,8 +99,8 @@ function success( midiAccess ) {
     log.innerHTML += outputs.size+" outputs:\n";
 
     i = 0;
-    outputs.forEach(function(key, value){
-        log.innerHTML += i++ + ": " + value.name + "; manufacturer: " + value.manufacturer + "; version: " + value.version + "\n";
+    outputs.forEach(function(port){
+        log.innerHTML += i++ + ": " + port.name + "; manufacturer: " + port.manufacturer + "; version: " + port.version + "\n";
     });
 
     if(outputs.size > 0) {
