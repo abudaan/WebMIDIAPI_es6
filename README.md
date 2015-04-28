@@ -61,10 +61,10 @@ navigator.requestMIDIAccess().then(onFulFilled, onRejected);
 
 ####Examples
 
-- [list_devices](http://abudaan.github.com/WebMIDIAPIShim_es6/examples/list_devices) simple listing of all MIDI devices
-- [routing_1](http://abudaan.github.com/WebMIDIAPIShim_es6/examples/routing_1) example that lets you route MIDI inports to MIDI outports
-- [routing_2](http://abudaan.github.com/WebMIDIAPIShim_es6/examples/routing_2) same routing example with slightly different code
-- [nodejs](http://abudaan.github.com/WebMIDIAPIShim_es6/examples/nodejs) example of using the polyfill with Nodejs
+- [list_devices](http://abudaan.github.com/WebMIDIAPI_es6/examples/list_devices) simple listing of all MIDI devices
+- [routing_1](http://abudaan.github.com/WebMIDIAPI_es6/examples/routing_1) example that lets you route MIDI inports to MIDI outports
+- [routing_2](http://abudaan.github.com/WebMIDIAPI_es6/examples/routing_2) same routing example with slightly different code
+- [nodejs](http://abudaan.github.com/WebMIDIAPI_es6/examples/nodejs) example of using the polyfill with Nodejs
 
 
 ####Building the polyfill
