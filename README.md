@@ -7,52 +7,69 @@ This polyfill was originally designed to test usability of the API itself, but i
 
 This polyfill now supports multiple simultaneous inputs and outputs, and sending and receiving long messages (sysem exclusive). It also properly dispatches events. Timestamps on send and receive should be properly implemented now, although of course timing will not be very precise on either.
 
-##Usage
+##Usage in a browser
 
-1. Copy the files WebMIDIAPIShim.js and WebMIDIAPIShim.js.map from /build/ into your project.
-2. Add "&lt;script src='/your/path/WebMIDIAPIShim.js'>&lt;/script>" to your code.
+1. Copy the file WebMIDIAPI.js from the /lib folder into your project.
+2. Optionally you can copy the sourc map file WebMIDIAPI.js.map as well
+3. Add "&lt;script src='/your/path/to/WebMIDIAPI.js'>&lt;/script>" to your code.
 
 You can use the Web MIDI API as captured in the specification - the polyfill will automatically check to see if the Web MIDI API is already implemented, and if not it will insert itself.
 
 So, some sample usage:
 
-    var m = null; // m = MIDIAccess object for you to make calls on
-    navigator.requestMIDIAccess().then( onsuccesscallback, onerrorcallback );
+```
+var m = null; // m = MIDIAccess object for you to make calls on
+navigator.requestMIDIAccess().then( onsuccesscallback, onerrorcallback );
 
-    function onsuccesscallback( access ) {
-      m = access;
+function onsuccesscallback( access ) {
+  m = access;
 
-      // Things you can do with the MIDIAccess object:
-      var inputs = m.inputs; // inputs = MIDIInputMaps, you can retrieve the inputs with iterators
-      var outputs = m.outputs; // outputs = MIDIOutputMaps, you can retrieve the outputs with iterators
+  // Things you can do with the MIDIAccess object:
+  var inputs = m.inputs; // inputs = MIDIInputMaps, you can retrieve the inputs with iterators
+  var outputs = m.outputs; // outputs = MIDIOutputMaps, you can retrieve the outputs with iterators
 
-      var iteratorInputs = inputs.values() // returns an iterator that loops over all inputs
-      var input = iteratorInputs.next().value // get the first input
+  var iteratorInputs = inputs.values() // returns an iterator that loops over all inputs
+  var input = iteratorInputs.next().value // get the first input
 
-      input.onmidimessage = myMIDIMessagehandler; // onmidimessage( event ), event.data & event.receivedTime are populated
+  input.onmidimessage = myMIDIMessagehandler; // onmidimessage( event ), event.data & event.receivedTime are populated
 
-      var iteratorOutputs = outputs.values() // returns an iterator that loops over all outputs
-      var output = iteratorOutputs.next().value; // grab first output device
+  var iteratorOutputs = outputs.values() // returns an iterator that loops over all outputs
+  var output = iteratorOutputs.next().value; // grab first output device
 
-      output.send( [ 0x90, 0x45, 0x7f ] ); // full velocity note on A4 on channel zero
-      output.send( [ 0x80, 0x45, 0x7f ], window.performance.now() + 1000 ); // full velocity A4 note off in one second.
-    };
+  output.send( [ 0x90, 0x45, 0x7f ] ); // full velocity note on A4 on channel zero
+  output.send( [ 0x80, 0x45, 0x7f ], window.performance.now() + 1000 ); // full velocity A4 note off in one second.
+};
 
-    function onerrorcallback( err ) {
-      console.log( "uh-oh! Something went wrong! Error code: " + err.code );
-    }
+function onerrorcallback( err ) {
+  console.log( "uh-oh! Something went wrong! Error code: " + err.code );
+}
+```
+
+##Usage with Nodejs
+
+You can use the shim in your Nodejs projects as well:
+
+```
+var navigator = require('web-midi-api');
+
+// and from here your code is exactly the same as a browser project
+navigator.requestMIDIAccess().then(onFulFilled, onRejected);
+
+
+```
 
 
 ##Examples
 
-- [test1](http://abudaan.github.io/WebMIDIAPIShim_es6/tests/test1) simple listing of all MIDI devices
-- [test2a](http://abudaan.github.io/WebMIDIAPIShim_es6/tests/test2a) routing example
-- [test2b](http://abudaan.github.io/WebMIDIAPIShim_es6/tests/test2b) same routing example in slightly different code
+- [list_devices](http://abudaan.github.com/WebMIDIAPIShim_es6/examples/list_devices) simple listing of all MIDI devices
+- [routing_1](http://abudaan.github.com/WebMIDIAPIShim_es6/examples/routing_1) example that lets you route MIDI inports to MIDI outports
+- [routing_2](http://abudaan.github.com/WebMIDIAPIShim_es6/examples/routing_2) same routing example with slightly different code
+- [nodejs](http://abudaan.github.com/WebMIDIAPIShim_es6/examples/nodejs) example of using the shim with Nodejs
 
 
-## Building the shim
+##Building the shim
 
-You need to have [Node.js](http://nodejs.org/) and [npm](https://www.npmjs.org/) installed.
+The shim is written in es6 so you need to transpile it before it can run in a browser. You can find the es6 files in the /src folder. If you change something in the es6 files, you need to build the shim again. To do this, you need to have [Node.js](http://nodejs.org/) and [npm](https://www.npmjs.org/) installed.
 
 Then install the project dependencies using:
 
@@ -60,12 +77,12 @@ Then install the project dependencies using:
 
 This will install a.o. browserify and babelify.
 
-The shim is written in es6 so you need to transpile it before it can run in a browser.
 
-Start watchify and transpile code as soon as a file has changed:
+During development you can start watchify which transpiles your code as soon as you save a changed file:
 
     npm run watch
 
-Transpile and build the code with a separate sourcemap:
+
+If you're satisfied with the new code, you can transpile and minimize the code and create a separate sourcemap by:
 
     npm run build

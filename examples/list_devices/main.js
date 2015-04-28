@@ -26,6 +26,8 @@ window.onload = function(){
 
   function showMIDIPorts(midiAccess){
     var
+      divInputs = document.getElementById('inputs'),
+      divOutputs = document.getElementById('outputs'),
       inputs = midiAccess.inputs,
       outputs = midiAccess.outputs,
       html;
@@ -36,14 +38,14 @@ window.onload = function(){
       html += '<span class="small">manufacturer: ' + port.manufacturer + '</span><br>';
       html += '<span class="small">version: ' + port.version + '</span><br><br>';
     });
+    divInputs.innerHTML = html;
 
-    html += '<h4>midi outputs:</h4>';
+    html = '<h4>midi outputs:</h4>';
     outputs.forEach(function(port){
       html += port.name + '<br>';
       html += '<span class="small">manufacturer: ' + port.manufacturer + '</span><br>';
       html += '<span class="small">version: ' + port.version + '</span><br><br>';
     });
-
-    div.innerHTML = html;
+    divOutputs.innerHTML = html;
   }
 };

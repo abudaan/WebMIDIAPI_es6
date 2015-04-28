@@ -2,12 +2,13 @@
   This script is for Node.js, you can run it like so:
     - open a terminal
     - navigate to the folder that contains this file
+    - run "npm install web-midi-api" to install the shim in the local directory
     - type "node test.js" in your terminal and press the enter key (on Linux type: "nodejs test.js")
 */
 
 'use strict';
 
-var navigator = require('../../../WebMIDIAPIShim_es6');
+var navigator = require('web-midi-api');
 
 var midi;
 var inputs;
@@ -15,6 +16,7 @@ var outputs;
 
 function onMIDIFailure(msg){
   console.log('Failed to get MIDI access - ' + msg);
+  process.exit(1);
 }
 
 function onMIDISuccess(midiAccess){
