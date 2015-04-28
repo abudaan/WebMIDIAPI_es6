@@ -7,7 +7,7 @@ This polyfill was originally designed to test usability of the API itself, but i
 
 This polyfill now supports multiple simultaneous inputs and outputs, and sending and receiving long messages (sysem exclusive). It also properly dispatches events. Timestamps on send and receive should be properly implemented now, although of course timing will not be very precise on either.
 
-##Usage in a browser
+####Use in a browser
 
 1. Copy the file WebMIDIAPI.js from the /lib folder into your project.
 2. Optionally you can copy the sourc map file WebMIDIAPI.js.map as well
@@ -45,7 +45,7 @@ function onerrorcallback( err ) {
 }
 ```
 
-##Usage with Nodejs
+####Use with Nodejs
 
 You can use the shim in your Nodejs projects as well:
 
@@ -59,7 +59,7 @@ navigator.requestMIDIAccess().then(onFulFilled, onRejected);
 ```
 
 
-##Examples
+####Examples
 
 - [list_devices](http://abudaan.github.com/WebMIDIAPIShim_es6/examples/list_devices) simple listing of all MIDI devices
 - [routing_1](http://abudaan.github.com/WebMIDIAPIShim_es6/examples/routing_1) example that lets you route MIDI inports to MIDI outports
@@ -67,7 +67,7 @@ navigator.requestMIDIAccess().then(onFulFilled, onRejected);
 - [nodejs](http://abudaan.github.com/WebMIDIAPIShim_es6/examples/nodejs) example of using the shim with Nodejs
 
 
-##Building the shim
+####Building the shim
 
 The shim is written in es6 so you need to transpile it before it can run in a browser. You can find the es6 files in the /src folder. If you change something in the es6 files, you need to build the shim again. To do this, you need to have [Node.js](http://nodejs.org/) and [npm](https://www.npmjs.org/) installed.
 
