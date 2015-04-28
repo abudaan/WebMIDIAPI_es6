@@ -29,7 +29,7 @@ window.onload = function(){
   }
 
 
-  function showMIDIPorts(midiAccess){
+  function showMIDIPorts(){
     var
       divInputs = document.getElementById('inputs'),
       divOutputs = document.getElementById('outputs'),
