@@ -10,7 +10,7 @@ This polyfill now supports multiple simultaneous inputs and outputs, and sending
 ####Use in a browser
 
 1. Copy the file WebMIDIAPI.js from the /lib folder into your project.
-2. Optionally you can copy the sourc map file WebMIDIAPI.js.map as well
+2. Optionally you can copy the source map file WebMIDIAPI.js.map as well
 3. Add "&lt;script src='/your/path/to/WebMIDIAPI.js'>&lt;/script>" to your code.
 
 You can use the Web MIDI API as captured in the specification - the polyfill will automatically check to see if the Web MIDI API is already implemented, and if not it will insert itself.
@@ -47,7 +47,7 @@ function onerrorcallback( err ) {
 
 ####Use with Nodejs
 
-You can use the shim in your Nodejs projects as well:
+You can use the polyfill in your Nodejs projects as well:
 
 ```
 var navigator = require('web-midi-api');
@@ -64,12 +64,12 @@ navigator.requestMIDIAccess().then(onFulFilled, onRejected);
 - [list_devices](http://abudaan.github.com/WebMIDIAPIShim_es6/examples/list_devices) simple listing of all MIDI devices
 - [routing_1](http://abudaan.github.com/WebMIDIAPIShim_es6/examples/routing_1) example that lets you route MIDI inports to MIDI outports
 - [routing_2](http://abudaan.github.com/WebMIDIAPIShim_es6/examples/routing_2) same routing example with slightly different code
-- [nodejs](http://abudaan.github.com/WebMIDIAPIShim_es6/examples/nodejs) example of using the shim with Nodejs
+- [nodejs](http://abudaan.github.com/WebMIDIAPIShim_es6/examples/nodejs) example of using the polyfill with Nodejs
 
 
-####Building the shim
+####Building the polyfill
 
-The shim is written in es6 so you need to transpile it before it can run in a browser. You can find the es6 files in the /src folder. If you change something in the es6 files, you need to build the shim again. To do this, you need to have [Node.js](http://nodejs.org/) and [npm](https://www.npmjs.org/) installed.
+The polyfill is written in es6 so you need to transpile it before it can run in a browser. You can find the es6 files in the /src folder. If you change something in the es6 files, you need to build the polyfill again. To do this, you need to have [Node.js](http://nodejs.org/) and [npm](https://www.npmjs.org/) installed.
 
 Then install the project dependencies using:
 
@@ -83,6 +83,6 @@ During development you can start watchify which transpiles your code as soon as 
     npm run watch
 
 
-If you're satisfied with the new code, you can transpile and minimize the code and create a separate sourcemap by:
+If you're satisfied with the new code, you can transpile, build and minimize the code and create a separate sourcemap by:
 
     npm run build
