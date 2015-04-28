@@ -7,11 +7,16 @@ window.onload = function(){
   'use strict';
 
   var div = document.getElementById('container');
+  var midiAccess;
 
   if(navigator.requestMIDIAccess !== undefined){
     navigator.requestMIDIAccess().then(
-      function onFulfilled(midiAccess){
-        showMIDIPorts(midiAccess);
+      function onFulfilled(access){
+        midiAccess = access;
+        // create a list of all connected MIDI devices
+        showMIDIPorts();
+        // reload list as devices get connected or disconnected
+        midiAccess.onstatechange = showMIDIPorts;
       },
       function onRejected(e){
         // something went wrong while requesting the MIDI devices
